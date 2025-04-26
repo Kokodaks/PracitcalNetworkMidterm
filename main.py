@@ -49,7 +49,6 @@ for SDid, SD in enumerate(SDs):
         #각 FreqReUSe의 NoUpLink마다 랜덤으로 Power를 모델링함. 보강/상세간섭을 예상해서 NormalDistribution으로 0을 중심으로 -6~6까지 사이의 값들이 총 68%를 차지함
         NormalDistribution = np.random.randn(FreqReUse, NoUpLink)
         mu = 0
-        SD = 6
         LogNormal = mu + SD*NormalDistribution
 
         #각 FreqReUse의 NoUpLink마다 Power(보강간섭/상세간섭 영향 포함)에서 Distance를 감안한 Power 값 생성
