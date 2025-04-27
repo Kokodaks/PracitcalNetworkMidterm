@@ -7,11 +7,13 @@ NtwSizeA=-2000
 NtwSizeB=2000
 PlusShift=12000
 MinusShift=-12000
-No_Iteration=1000
+No_Iteration=10000
 
 SDs = [4, 6, 10]
 colors=['y', 'm', 'c']
 labels=['SD=4', 'SD=6', 'SD=10']
+
+plt.figure(figsize=[10, 8])
 
 for SDid, SD in enumerate(SDs):
     #[1][12] 크기의 빈 2차원 배열 생성
@@ -49,7 +51,6 @@ for SDid, SD in enumerate(SDs):
         #각 FreqReUSe의 NoUpLink마다 랜덤으로 Power를 모델링함. 보강/상세간섭을 예상해서 NormalDistribution으로 0을 중심으로 -6~6까지 사이의 값들이 총 68%를 차지함
         NormalDistribution = np.random.randn(FreqReUse, NoUpLink)
         mu = 0
-        SD = 6
         LogNormal = mu + SD*NormalDistribution
 
         #각 FreqReUse의 NoUpLink마다 Power(보강간섭/상세간섭 영향 포함)에서 Distance를 감안한 Power 값 생성
@@ -77,4 +78,24 @@ for SDid, SD in enumerate(SDs):
     #SIR의 첫번째 행 (SIR = np.zeros(1, NoUpLink))으로 더해진 [0,0,0,0,0,0,0,0,...] 행 삭제
     SIR=np.delete(SIR, 0, 0)
     SIR = SIR.flatten()
+
+    hist, bin_left = np.histogram(SIR, bins=100)
+
+    pdf = hist / np.size(SIR)
+    cdf = np.cumsum(pdf)
+
+    plt.semilogy(bin_left[:-1], cdf, color=colors[SDid], lw=2, label=labels[SDid])
+
+    cdf_at_10 = cdf[np.searchsorted(bin_left[:-1], 10)]
+    print(f"SD={SD}, P(SIR < 10 dB): {cdf_at_10:.4f}")
+
+plt.xlabel('Signal to Interference Ratio (SIR) [dB]')
+plt.ylabel('Probability of SIR(SIR < x)')
+plt.title('Cumulative Density Function of SIR')
+plt.text(20, 1e-3, r'Frequency Reuse Factor=9')
+plt.axis([-5, 50, 1e-4, 1])
+plt.grid(True)
+plt.legend()
+plt.show()
+
 
